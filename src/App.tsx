@@ -11,6 +11,7 @@ import { Recipe } from './assets/interfaces';
 function App() {
   const [user, setUser] = useState<firebase.User | null>(null);
   const [recipes, setRecipes] = useState<Recipe[]>();
+  FirebaseAuthService.subscribeToAuthChanges(setUser);
 
   useEffect( ( ) => {
     fetchRecipes()
@@ -23,26 +24,27 @@ function App() {
           throw error;
         }
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const fetchRecipes = async ( ) => {
+    const queries = [];
+    if(!user){
+      queries.push({
+        field: 'isPublished',
+        condition: "==",
+        value: true
+      });
+    }
     
     let fetchedRecipes;
     try {
-      // type FirebaseResponse = {
-      //   data?: {
-      //     pokemon: Omit<PokemonData, 'fetchedAt'>
-      //   }
-      //   errors?: Array<{message: string}>
-      // }
-      // console.log(response.docs[0].data());
-      // const {data, errors}: JSONResponse = await response.json()
-
-      const response = await FirebaseFirestoreService.readDocuments('recipes');
+      const response = await FirebaseFirestoreService.readDocuments({ collection: 'recipes', queries: queries });
       
       const newRecipes = response.docs.map((recipeDoc) => {
         const id = recipeDoc.id;
         const data = recipeDoc.data();
+
         const dataRecipe: Recipe = {
           name: data.name,
           category: data.category,
@@ -52,9 +54,9 @@ function App() {
           ingredients: data.ingredients,
           id: id
         };
-        // return { ...data, id}
         return dataRecipe;
       })
+      
       fetchedRecipes = [...newRecipes];
       return fetchedRecipes;
 
@@ -78,8 +80,6 @@ function App() {
     }
   }
 
-  FirebaseAuthService.subscribeToAuthChanges(setUser);
-
   const handleAddRecipe = async (newRecipe: Recipe) => {
     try {
       const response = await FirebaseFirestoreService.createDocument('recipes', newRecipe);
@@ -90,6 +90,28 @@ function App() {
     } catch (error) {
       if(error instanceof Error) alert(error.message);
     }
+  }
+
+  const lookupCategoryLabel = (categoryKey: string) => {
+    const categories = {
+      breadSandwichesAndPizza: 'Breads, Sandwiches, and Pizza',
+      eggsAndBreakfast: 'Eggs & Breakfast',
+      dessertsAndBakedGoods: 'Desserts & Baked Goods',
+      fishAndSeafood: 'Fish & Sefood',
+      vegetables: 'Vegetables',
+    };
+
+    const label = categories[categoryKey as keyof typeof categories];
+    return label;
+  }
+
+  const formatData = (date: Date) => {
+    const day = date.getUTCDate();
+    const month = date.getUTCMonth() + 1;
+    const year = date.getFullYear();
+    const dateString = `${day}-${month}-${year}`;
+
+    return dateString;
   }
 
   return (
@@ -108,9 +130,14 @@ function App() {
                     recipes.map((recipe) => {
                       return (
                         <div className='recipe-card' key={recipe.id}>
+                          {
+                            recipe.isPublished === false ? (
+                              <div className='unpublished'>UNPUBLISHED</div>
+                            ) : null
+                          }
                           <div className='recipe-name'>{recipe.name}</div>
-                          <div className='recipe-field'>Category: {recipe.category}</div>
-                          <div className='recipe-field'>Publish Date: {recipe.publishDate.toString()}</div>
+                          <div className='recipe-field'>Category: {lookupCategoryLabel(recipe.category)}</div>
+                          <div className='recipe-field'>Publish Date: {formatData(recipe.publishDate)}</div>
                         </div>
                       )
                     })
