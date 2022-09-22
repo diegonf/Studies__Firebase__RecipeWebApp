@@ -1,4 +1,3 @@
-import firebase from '../FirebaseConfig';
 
 export interface Recipe {
   name: string

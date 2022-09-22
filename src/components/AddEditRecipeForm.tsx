@@ -1,12 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import React from 'react';
 import { Recipe } from "../assets/interfaces";
 
 interface Props {
-  handleAddRecipe: (newRecipe: Recipe) => Promise<void>
+  existingRecipe: Recipe | null,
+  handleAddRecipe: (newRecipe: Recipe) => Promise<void>,
+  handleUpdateRecipe: (newRecipe: Recipe, recipeId: string) => Promise<void>,
+  handleDeleteRecipe: (recipeId: string) => Promise<void>
+  handleEditRecipeCancel: () => void,
 }
 
-const AddEditRecipeForm = ( { handleAddRecipe } : Props ) => {
+const AddEditRecipeForm = (props: Props) => {
+  const { existingRecipe, handleAddRecipe, handleUpdateRecipe, handleEditRecipeCancel, handleDeleteRecipe } = props;
+
+
+  useEffect(() => {
+    console.log('useEffect existingUser')
+    if (existingRecipe) {
+      console.log('useEffect dentro do IF')
+      setName(existingRecipe.name);
+      setCategory(existingRecipe.category);
+      setDirections(existingRecipe.directions);
+      setPublishDate(existingRecipe.publishDate.toISOString().split('T')[0]);
+      setIngredients(existingRecipe.ingredients);
+      console.log('useEffect FIM do IF')
+    } else {
+      resetForm();
+    }
+  }, [existingRecipe]);
+
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [publishDate, setPublishDate] = useState(new Date().toISOString().split("T")[0]);
@@ -17,7 +39,7 @@ const AddEditRecipeForm = ( { handleAddRecipe } : Props ) => {
   const handleRecipeFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if(ingredients.length === 0) {
+    if (ingredients.length === 0) {
       alert('Ingredients cannot be empty. Please add at least 1 ingredient.');
       return;
     }
@@ -33,17 +55,22 @@ const AddEditRecipeForm = ( { handleAddRecipe } : Props ) => {
       ingredients
     }
 
-    handleAddRecipe(newRecipe);
+    if(existingRecipe){
+      handleUpdateRecipe(newRecipe, existingRecipe.id as string);
+    } else {
+      handleAddRecipe(newRecipe);
+    }
+    resetForm();
   }
 
   const handleAddIngredient = (e: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if(e.type !== 'click' && (e as React.KeyboardEvent).key !== 'Enter'){
+    if (e.type !== 'click' && (e as React.KeyboardEvent).key !== 'Enter') {
       return;
     }
 
     e.preventDefault();
 
-    if(!ingredientName) {
+    if (!ingredientName) {
       alert('Missing ingredient field. Please double check.');
       return;
     }
@@ -52,15 +79,34 @@ const AddEditRecipeForm = ( { handleAddRecipe } : Props ) => {
     setIngredientName('');
   }
 
+  const handleDeleteIngredient = (ingredientName: string) => {
+    const remainingIngredients = ingredients.filter((ingredient) => {
+      return ingredient !== ingredientName;
+    });
+
+    setIngredients(remainingIngredients);
+  };
+
+  const resetForm = () => {
+    console.log('Reset Form Called')
+    setName('');
+    setCategory('');
+    setDirections('');
+    setPublishDate('');
+    setIngredients([]);
+  }
+
   return (
     <form onSubmit={handleRecipeFormSubmit} className='add-edit-recipe-form-container'>
-      <h2>Add a New Recipe</h2>
+      {
+        existingRecipe ? <h2>Update the Recipe</h2> : <h2>Add a New Recipe</h2>
+      }
       <div className='top-form-section'>
         <div className='fields'>
           <label className='recipe-label input-label'>
             Recipe Name:
-            <input 
-              type="text" 
+            <input
+              type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -69,7 +115,7 @@ const AddEditRecipeForm = ( { handleAddRecipe } : Props ) => {
           </label>
           <label className='recipe-label input-label'>
             Category:
-            <select 
+            <select
               required
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -81,11 +127,11 @@ const AddEditRecipeForm = ( { handleAddRecipe } : Props ) => {
               <option value='dessertsAndBakedGoods'>Desserts & Baked Goods</option>
               <option value='fishAndSeafood'>Fish & Sefood</option>
               <option value='vegetables'>Vegetables</option>
-              </select>
+            </select>
           </label>
           <label className='recipe-label input-label'>
             Dierctions:
-            <textarea 
+            <textarea
               required
               value={directions}
               onChange={(e) => setDirections(e.target.value)}
@@ -94,8 +140,8 @@ const AddEditRecipeForm = ( { handleAddRecipe } : Props ) => {
           </label>
           <label className='recipe-label input-label'>
             Publish Date:
-            <input 
-              type="date" 
+            <input
+              type="date"
               required
               value={publishDate}
               onChange={(e) => setPublishDate(e.target.value)}
@@ -120,9 +166,10 @@ const AddEditRecipeForm = ( { handleAddRecipe } : Props ) => {
                   <tr key={ingredient}>
                     <td className='table-data text-center'>{ingredient}</td>
                     <td className='ingredient-delete-box'>
-                      <button 
+                      <button
                         type='button'
                         className='secondary-button ingredient-delete-button'
+                        onClick={() => handleDeleteIngredient(ingredient)}
                       >
                         Delete
                       </button>
@@ -141,8 +188,8 @@ const AddEditRecipeForm = ( { handleAddRecipe } : Props ) => {
         <div className='ingredient-form'>
           <label className='ingredient-label'>
             Ingredient:
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={ingredientName}
               onChange={(e) => setIngredientName(e.target.value)}
               onKeyDown={handleAddIngredient}
@@ -150,8 +197,8 @@ const AddEditRecipeForm = ( { handleAddRecipe } : Props ) => {
               placeholder='ex. 1 cup of sugar'
             />
           </label>
-          <button 
-            type='button' 
+          <button
+            type='button'
             className='primary-button add-ingredient-button'
             onClick={handleAddIngredient}
           >
@@ -160,7 +207,25 @@ const AddEditRecipeForm = ( { handleAddRecipe } : Props ) => {
         </div>
       </div>
       <div className='action-buttons'>
-        <button type='submit' className='primary-button action-button'>Create Recipe</button>
+        <button type='submit' className='primary-button action-button'>
+          { existingRecipe ? "Update Recipe" : "Create Recipe" }
+        </button>
+        {
+          existingRecipe ? (
+            <>
+              <button 
+                type="button"
+                onClick={handleEditRecipeCancel}
+                className='primary-button action-button'
+              >Cancel</button>
+              <button 
+                type="button"
+                onClick={() => handleDeleteRecipe(existingRecipe.id as string)}
+                className='primary-button action-button'
+              >Delete</button>
+            </>
+          ) : null
+        }
       </div>
     </form>
   );

@@ -28,9 +28,19 @@ const readDocuments = (props: Props) => {
   return collectionRef.get();
 }
 
+const updateDocument = (collection: string, id: string, document: Recipe) => {
+  return firestore.collection(collection).doc(id).update(document);
+}
+
+const deleteDocument = (collection: string, id: string) => {
+  return firestore.collection(collection).doc(id).delete();
+}
+
 const FirebaseFirestoreService = {
   createDocument,
   readDocuments,
+  updateDocument,
+  deleteDocument,
 };
 
 export default FirebaseFirestoreService;
