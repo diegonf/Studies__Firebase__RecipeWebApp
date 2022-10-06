@@ -15,15 +15,12 @@ const AddEditRecipeForm = (props: Props) => {
 
 
   useEffect(() => {
-    console.log('useEffect existingUser')
     if (existingRecipe) {
-      console.log('useEffect dentro do IF')
       setName(existingRecipe.name);
       setCategory(existingRecipe.category);
       setDirections(existingRecipe.directions);
       setPublishDate(existingRecipe.publishDate.toISOString().split('T')[0]);
       setIngredients(existingRecipe.ingredients);
-      console.log('useEffect FIM do IF')
     } else {
       resetForm();
     }
@@ -88,7 +85,6 @@ const AddEditRecipeForm = (props: Props) => {
   };
 
   const resetForm = () => {
-    console.log('Reset Form Called')
     setName('');
     setCategory('');
     setDirections('');

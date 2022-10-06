@@ -9,10 +9,19 @@ const createDocument = (collection: string, document: Recipe) => {
 
 interface Props {
   collection: string,
-  queries: Query[]
+  queries: Query[],
+  orderByField: string,
+  orderByDirection: string,
+  perPage: number,
+  cursorId: string
 }
-const readDocuments = (props: Props) => {
-  const { collection, queries } = props;
+
+const readDocument = (collection: string, id: string) => {
+  return firestore.collection(collection).doc(id).get();
+}
+
+const readDocuments = async (props: Props) => {
+  const { collection, queries, orderByField, orderByDirection, perPage, cursorId } = props;
   let collectionRef: firebase.firestore.Query<firebase.firestore.DocumentData> = firestore.collection(collection);
 
   if(queries && queries.length > 0) {
@@ -23,6 +32,19 @@ const readDocuments = (props: Props) => {
         query.value
       );
     }
+  }
+
+  if(orderByField && orderByDirection){
+    collectionRef = collectionRef.orderBy(orderByField, orderByDirection as firebase.firestore.OrderByDirection);
+  }
+
+  if(perPage) {
+    collectionRef = collectionRef.limit(perPage);
+  }
+  if(cursorId) {
+    const document = await readDocument(collection, cursorId);
+
+    collectionRef = collectionRef.startAfter(document);
   }
 
   return collectionRef.get();
