@@ -1,7 +1,7 @@
 ## <p align="center">![Text Converter Tool](./readme-image.png)<br>Firebase Recipes</p>
 
-* Instituição: Udemy
-* [Curso: Learn Firebase Core With React](https://www.udemy.com/course/learn-firebase/)
+* Instituição: [Udemy](https://www.udemy.com)
+* Curso: [Learn Firebase Core With React](https://www.udemy.com/course/learn-firebase/)
 * Projeto Publicado: https://fir-recipes-99b2b.web.app/
 
 ## Descrição do projeto
