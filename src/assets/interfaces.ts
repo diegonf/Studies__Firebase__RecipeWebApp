@@ -6,6 +6,7 @@ export interface Recipe {
   publishDate: Date
   isPublished: boolean
   ingredients: string[]
+  imageUrl: string
   id?: string
 }
 

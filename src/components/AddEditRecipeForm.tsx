@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import React from 'react';
 import { Recipe } from "../assets/interfaces";
+import ImageUploadPreview from "./ImageUploadPreview";
 
 interface Props {
   existingRecipe: Recipe | null,
@@ -21,6 +22,7 @@ const AddEditRecipeForm = (props: Props) => {
       setDirections(existingRecipe.directions);
       setPublishDate(existingRecipe.publishDate.toISOString().split('T')[0]);
       setIngredients(existingRecipe.ingredients);
+      setImageUrl(existingRecipe.imageUrl);
     } else {
       resetForm();
     }
@@ -32,12 +34,18 @@ const AddEditRecipeForm = (props: Props) => {
   const [directions, setDirections] = useState('');
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [ingredientName, setIngredientName] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
 
   const handleRecipeFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (ingredients.length === 0) {
       alert('Ingredients cannot be empty. Please add at least 1 ingredient.');
+      return;
+    }
+
+    if(!imageUrl) {
+      alert('Missing recipe image. Please add a recipe image.');
       return;
     }
 
@@ -49,7 +57,8 @@ const AddEditRecipeForm = (props: Props) => {
       directions,
       publishDate: new Date(publishDate),
       isPublished,
-      ingredients
+      ingredients,
+      imageUrl
     }
 
     if(existingRecipe){
@@ -90,6 +99,7 @@ const AddEditRecipeForm = (props: Props) => {
     setDirections('');
     setPublishDate('');
     setIngredients([]);
+    setImageUrl('');
   }
 
   return (
@@ -98,6 +108,15 @@ const AddEditRecipeForm = (props: Props) => {
         existingRecipe ? <h2>Update the Recipe</h2> : <h2>Add a New Recipe</h2>
       }
       <div className='top-form-section'>
+        <div className="imagem-input-box">
+          Recipe Image
+          <ImageUploadPreview
+            basePath='recipes'
+            existingImageUrl={imageUrl}
+            handleUploadFinish={ (downloadUrl: string) => setImageUrl(downloadUrl)}
+            handleUploadCancel={() => setImageUrl('')}
+          />
+        </div>
         <div className='fields'>
           <label className='recipe-label input-label'>
             Recipe Name:
@@ -126,7 +145,7 @@ const AddEditRecipeForm = (props: Props) => {
             </select>
           </label>
           <label className='recipe-label input-label'>
-            Dierctions:
+            Directions:
             <textarea
               required
               value={directions}

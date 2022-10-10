@@ -92,6 +92,7 @@ function App() {
           isPublished: data.isPublished,
           publishDate: new Date(data.publishDate.seconds * 1000),
           ingredients: data.ingredients,
+          imageUrl: data.imageUrl,
           id: id
         };
         return dataRecipe;
@@ -297,6 +298,13 @@ function App() {
                             ) : null
                           }
                           <div className='recipe-name'>{recipe.name}</div>
+                          <div className='recipe-image-box'>
+                            {
+                              recipe.imageUrl ? (
+                                <img src={recipe.imageUrl} alt={recipe.name} className='recipe-image' />
+                              ) : null
+                            }
+                          </div>
                           <div className='recipe-field'>Category: {lookupCategoryLabel(recipe.category)}</div>
                           <div className='recipe-field'>Publish Date: {formatData(recipe.publishDate)}</div>
                           {
