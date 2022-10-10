@@ -20,7 +20,9 @@ const AddEditRecipeForm = (props: Props) => {
       setName(existingRecipe.name);
       setCategory(existingRecipe.category);
       setDirections(existingRecipe.directions);
-      setPublishDate(existingRecipe.publishDate.toISOString().split('T')[0]);
+      if(existingRecipe.publishDate instanceof Date) {
+        setPublishDate(existingRecipe.publishDate.toISOString().split('T')[0]);
+      }
       setIngredients(existingRecipe.ingredients);
       setImageUrl(existingRecipe.imageUrl);
     } else {
@@ -55,7 +57,8 @@ const AddEditRecipeForm = (props: Props) => {
       name,
       category,
       directions,
-      publishDate: new Date(publishDate),
+      // publishDate: new Date(publishDate),
+      publishDate: new Date(publishDate).getTime() / 1000,
       isPublished,
       ingredients,
       imageUrl

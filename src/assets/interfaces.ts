@@ -1,9 +1,9 @@
-
 export interface Recipe {
   name: string
   category: string
   directions: string
-  publishDate: Date
+  // publishDate: Date
+  publishDate: Date | number
   isPublished: boolean
   ingredients: string[]
   imageUrl: string
