@@ -1,4 +1,4 @@
-## <p align="center">![Text Converter Tool](./readme-image.PNG)<br>Firebase Recipes</p>
+## <p align="center">![Text Converter Tool](./readme-image.png)<br>Firebase Recipes</p>
 
 * Instituição: Udemy
 * [Curso: Learn Firebase Core With React](https://www.udemy.com/course/learn-firebase/)
